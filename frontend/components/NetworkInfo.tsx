@@ -9,6 +9,7 @@ export function NetworkInfo() {
   return (
     <div className="flex flex-col gap-6">
       <h4 className="text-lg font-medium">Network Info</h4>
+
       <LabelValueGrid
         items={[
           {

@@ -7,22 +7,39 @@ import { NetworkInfo } from "@/components/NetworkInfo";
 import { AccountInfo } from "@/components/AccountInfo.tsx";
 import { CreateCollection } from "@/components/CreateCollection.tsx";
 import { ModifyCollection } from "@/components/ModifyCollection.tsx";
+import { useState } from "react";
+import Select from "react-select";
+import { Network } from "@aptos-labs/ts-sdk";
+import { WrongNetworkAlert } from "@/components/WrongNetworkAlert.tsx";
 
 function App() {
   const { connected } = useWallet();
+  const options = Object.values(Network).map((network) => ({ value: network, label: network }));
+
+  const [network, setNetwork] = useState<Network>(options[0].value);
 
   return (
     <>
       <Header />
+
+      <WrongNetworkAlert expectedNetwork={network} />
+
       <div className="flex items-center justify-center flex-col">
+        <Select
+          defaultValue={options[0]}
+          options={options}
+          onChange={(e) => {
+            setNetwork(e?.value ?? network);
+          }}
+        />
         {connected ? (
           <Card>
             <CardContent className="flex flex-col gap-10 pt-6">
               <NetworkInfo />
               <AccountInfo />
-              <Collections />
+              <Collections expectedNetwork={network} />
               <CreateCollection />
-              <ModifyCollection />
+              <ModifyCollection expectedNetwork={network} />
             </CardContent>
           </Card>
         ) : (

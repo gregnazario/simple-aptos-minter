@@ -1,11 +1,11 @@
-import { NETWORK } from "@/constants";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import * as Dialog from "@radix-ui/react-dialog";
+import { Network } from "@aptos-labs/ts-sdk";
 
-export function WrongNetworkAlert() {
+export function WrongNetworkAlert({ expectedNetwork }: { expectedNetwork: Network }) {
   const { network, connected } = useWallet();
 
-  return !connected || network?.name === NETWORK ? (
+  return !connected || network?.name === expectedNetwork ? (
     <></>
   ) : (
     <Dialog.Root open={true}>
@@ -18,7 +18,7 @@ export function WrongNetworkAlert() {
             </Dialog.Title>
             <Dialog.Description className="text-lg text-gray-700 dark:text-gray-300">
               Your wallet is currently on <span className="font-bold">{network?.name}</span>. Please switch to{" "}
-              <span className="font-bold">{NETWORK}</span> to continue using the app.
+              <span className="font-bold">{expectedNetwork}</span> to continue using the app.
             </Dialog.Description>
           </div>
         </Dialog.Content>

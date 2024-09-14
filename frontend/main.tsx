@@ -17,7 +17,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <WalletProvider>
       <QueryClientProvider client={queryClient}>
         <App />
-        <WrongNetworkAlert />
         <Toaster />
       </QueryClientProvider>
     </WalletProvider>

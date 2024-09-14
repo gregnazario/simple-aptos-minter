@@ -3,9 +3,8 @@ import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { LabelValueGrid } from "@/components/LabelValueGrid";
 import { aptosClient } from "@/utils/aptosClient.ts";
 import { useEffect, useState } from "react";
-import { AccountAddress } from "@aptos-labs/ts-sdk";
+import { AccountAddress, Network } from "@aptos-labs/ts-sdk";
 import { Link } from "lucide-react";
-import { NETWORK } from "@/constants.ts";
 
 export const GetTokenData = `
 query GetTokensDataByName($where_condition: current_token_datas_v2_bool_exp!) {
@@ -117,7 +116,7 @@ export async function fetchTokens(collectionId: string | null | undefined) {
   return data.current_token_datas_v2;
 }
 
-export function Collections() {
+export function Collections({ expectedNetwork }: { expectedNetwork: Network }) {
   const { account } = useWallet();
   const [collections, setCollections] = useState<Array<CollectionData>>([]);
 
@@ -142,12 +141,12 @@ export function Collections() {
         value: (
           <div>
             <div className="text-sm text-gray-500">
-              <a href={`https://aptoscan.com/tokenv2/${col.collection_id}?network=${NETWORK}`}>
+              <a href={`https://aptoscan.com/tokenv2/${col.collection_id}?network=${expectedNetwork}`}>
                 See on AptoScan <Link size={18} />
               </a>
             </div>
             <div className="text-sm text-gray-500">
-              <a href={`https://explorer.aptoslabs.com/object/${col.collection_id}?network=${NETWORK}`}>
+              <a href={`https://explorer.aptoslabs.com/object/${col.collection_id}?network=${expectedNetwork}`}>
                 See on Aptos Explorer
                 <Link size={18} />
               </a>

@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CollectionData, fetchCollections, fetchTokens, TokenData } from "@/components/Collections.tsx";
 import Select from "react-select";
-import { NETWORK } from "@/constants.ts";
+import { expectedNetwork } from "@/constants.ts";
 import { Image, Link } from "lucide-react";
 import { LabelValueGrid } from "@/components/LabelValueGrid.tsx";
+import { Network } from "@aptos-labs/ts-sdk";
 
-export function ModifyCollection() {
+export function ModifyCollection({ expectedNetwork }: { expectedNetwork: Network }) {
   const { account, signAndSubmitTransaction } = useWallet();
   const queryClient = useQueryClient();
 
@@ -83,12 +84,12 @@ export function ModifyCollection() {
         <div className="text-sm text-gray-500">Max Supply: {col.current_supply}</div>
         <div className="text-sm text-gray-500">Last change time: {col.last_transaction_timestamp}</div>
         <div className="text-sm text-gray-500">
-          <a href={`https://aptoscan.com/tokenv2/${col.collection_id}?network=${NETWORK}`}>
+          <a href={`https://aptoscan.com/tokenv2/${col.collection_id}?network=${expectedNetwork}`}>
             See on AptoScan <Link size={18} />
           </a>
         </div>
         <div className="text-sm text-gray-500">
-          <a href={`https://explorer.aptoslabs.com/object/${col.collection_id}?network=${NETWORK}`}>
+          <a href={`https://explorer.aptoslabs.com/object/${col.collection_id}?network=${expectedNetwork}`}>
             See on Aptos Explorer
             <Link size={18} />
           </a>
@@ -120,12 +121,12 @@ export function ModifyCollection() {
         value: (
           <div>
             <div className="text-sm text-gray-500">
-              <a href={`https://aptoscan.com/tokenv2/${tok.token_data_id}?network=${NETWORK}`}>
+              <a href={`https://aptoscan.com/tokenv2/${tok.token_data_id}?network=${expectedNetwork}`}>
                 See on AptoScan <Link size={18} />
               </a>
             </div>
             <div className="text-sm text-gray-500">
-              <a href={`https://explorer.aptoslabs.com/token/${tok.token_data_id}?network=${NETWORK}`}>
+              <a href={`https://explorer.aptoslabs.com/token/${tok.token_data_id}?network=${expectedNetwork}`}>
                 See on Aptos Explorer
                 <Link size={18} />
               </a>
