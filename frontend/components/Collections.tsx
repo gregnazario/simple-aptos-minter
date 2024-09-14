@@ -163,7 +163,7 @@ export function Collections() {
   return (
     <div className="flex flex-col gap-6">
       <h4 className="text-lg font-medium">Owned Collections</h4>
-      <LabelValueGrid items={parseCollectionData()} />
+      <LabelValueGrid items={parseCollectionData() as any} />
     </div>
   );
 }
