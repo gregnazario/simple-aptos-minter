@@ -74,13 +74,13 @@ export function CreateCollection({ expectedNetwork }: { expectedNetwork: Network
       <Input
         disabled={!account}
         defaultValue={royaltyNumerator}
-        onChange={(e) => setSupply(parseInt(e.target.value, 10))}
+        onChange={(e) => setRoyaltyNumerator(parseInt(e.target.value, 10))}
       />
       Royalty Denominator{" "}
       <Input
         disabled={!account}
         defaultValue={royaltyDenominator}
-        onChange={(e) => setSupply(parseInt(e.target.value, 10))}
+        onChange={(e) => setRoyaltyDenominator(parseInt(e.target.value, 10))}
       />
       <Button disabled={!account} onClick={onClickButton}>
         Create Collection

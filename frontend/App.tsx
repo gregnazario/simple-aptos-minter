@@ -38,7 +38,7 @@ function App() {
               <NetworkInfo />
               <AccountInfo />
               <Collections expectedNetwork={network} />
-              <CreateCollection />
+              <CreateCollection expectedNetwork={network} />
               <ModifyCollection expectedNetwork={network} />
             </CardContent>
           </Card>
