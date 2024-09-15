@@ -6,8 +6,9 @@ import { toast } from "@/components/ui/use-toast";
 import { aptosClient } from "@/utils/aptosClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Network } from "@aptos-labs/ts-sdk";
 
-export function CreateCollection() {
+export function CreateCollection({ expectedNetwork }: { expectedNetwork: Network }) {
   const { account, signAndSubmitTransaction } = useWallet();
   const queryClient = useQueryClient();
 
@@ -15,6 +16,8 @@ export function CreateCollection() {
   const [uri, setUri] = useState<string>("https://media1.tenor.com/m/u5uXD3icJ1kAAAAC/simpsons-homer-simpson.gif");
   const [description, setDescription] = useState<string>("Some Collection Description");
   const [supply, setSupply] = useState<number>(100);
+  const [royaltyNumerator, setRoyaltyNumerator] = useState<number>(5);
+  const [royaltyDenominator, setRoyaltyDenominator] = useState<number>(100);
 
   const onClickButton = async () => {
     if (!account) {
@@ -40,12 +43,12 @@ export function CreateCollection() {
             true, // Mutable token uri
             true, // Tokens burnable by creator
             true, // Tokens freezable by creator
-            1, // Royalty numerator
-            100, // Royalty denominator
+            royaltyNumerator, // Royalty numerator
+            royaltyDenominator, // Royalty denominator
           ],
         },
       });
-      const executedTransaction = await aptosClient().waitForTransaction({
+      const executedTransaction = await aptosClient(expectedNetwork).waitForTransaction({
         transactionHash: committedTransaction.hash,
       });
       await queryClient.invalidateQueries();
@@ -67,6 +70,18 @@ export function CreateCollection() {
       URI <Input disabled={!account} defaultValue={uri} onChange={(e) => setUri(e.target.value)} />
       Max supply{" "}
       <Input disabled={!account} defaultValue={supply} onChange={(e) => setSupply(parseInt(e.target.value, 10))} />
+      Royalty Numerator{" "}
+      <Input
+        disabled={!account}
+        defaultValue={royaltyNumerator}
+        onChange={(e) => setSupply(parseInt(e.target.value, 10))}
+      />
+      Royalty Denominator{" "}
+      <Input
+        disabled={!account}
+        defaultValue={royaltyDenominator}
+        onChange={(e) => setSupply(parseInt(e.target.value, 10))}
+      />
       <Button disabled={!account} onClick={onClickButton}>
         Create Collection
       </Button>

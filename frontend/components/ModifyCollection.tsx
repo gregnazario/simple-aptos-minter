@@ -8,28 +8,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CollectionData, fetchCollections, fetchTokens, TokenData } from "@/components/Collections.tsx";
 import Select from "react-select";
-import { expectedNetwork } from "@/constants.ts";
 import { Image, Link } from "lucide-react";
 import { LabelValueGrid } from "@/components/LabelValueGrid.tsx";
 import { Network } from "@aptos-labs/ts-sdk";
 
 export function ModifyCollection({ expectedNetwork }: { expectedNetwork: Network }) {
-  const { account, signAndSubmitTransaction } = useWallet();
+  const { account, network, signAndSubmitTransaction } = useWallet();
   const queryClient = useQueryClient();
 
   const [collections, setCollections] = useState<Array<CollectionData>>([]);
   const [tokens, setTokens] = useState<Array<TokenData>>([]);
   const [collectionName, setCollectionName] = useState<string>("");
+  const [collectionId, setCollectionId] = useState<string>("");
   const [name, setName] = useState<string>("Some Token Name");
   const [modifyTokenId, setModifyTokenId] = useState<string>("");
   const [uri, setUri] = useState<string>("https://media1.tenor.com/m/u5uXD3icJ1kAAAAC/simpsons-homer-simpson.gif");
   const [modifyUri, setModifyUri] = useState<string>("");
   const [description, setDescription] = useState<string>("Some Collection Description");
+  const [newRoyaltyNumerator, setNewRoyaltyNumerator] = useState<string>("");
+  const [newRoyaltyDenominator, setNewRoyaltyDenominator] = useState<string>("");
+  const [newPayee, setNewPayee] = useState<string>("");
 
   useEffect(() => {
-    // TODO: Refactor to only fetch the appropriate collection
-    fetchCollections(account?.address).then(setCollections);
-  }, [account?.address]);
+    fetchCollections(expectedNetwork, account?.address).then(setCollections);
+  }, [account?.address, network, expectedNetwork]);
 
   function parseCollectionNames() {
     const parsedCollections = [];
@@ -61,7 +63,7 @@ export function ModifyCollection({ expectedNetwork }: { expectedNetwork: Network
   }
 
   async function onCollectionChange(collectionId: string) {
-    const tokenData = await fetchTokens(collectionId);
+    const tokenData = await fetchTokens(expectedNetwork, collectionId);
     setTokens(tokenData);
   }
 
@@ -74,6 +76,8 @@ export function ModifyCollection({ expectedNetwork }: { expectedNetwork: Network
     if (!col) {
       return <div>Collection not found</div>;
     }
+
+    // TODO: There's no way to fetch the royalty for the collection...
 
     return (
       <div>
@@ -152,7 +156,7 @@ export function ModifyCollection({ expectedNetwork }: { expectedNetwork: Network
           functionArguments: [collectionName, description, name, uri, [], [], []],
         },
       });
-      const executedTransaction = await aptosClient().waitForTransaction({
+      const executedTransaction = await aptosClient(expectedNetwork).waitForTransaction({
         transactionHash: committedTransaction.hash,
       });
       // TODO: Fix collection query for invalidation
@@ -179,7 +183,34 @@ export function ModifyCollection({ expectedNetwork }: { expectedNetwork: Network
           functionArguments: [modifyTokenId, modifyUri],
         },
       });
-      const executedTransaction = await aptosClient().waitForTransaction({
+      const executedTransaction = await aptosClient(expectedNetwork).waitForTransaction({
+        transactionHash: committedTransaction.hash,
+      });
+      // TODO: Fix collection query for invalidation
+      await queryClient.invalidateQueries();
+      toast({
+        title: "Success",
+        description: `Transaction succeeded, hash: ${executedTransaction.hash}`,
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const onRoyaltyChange = async () => {
+    if (!account) {
+      return;
+    }
+
+    try {
+      const committedTransaction = await signAndSubmitTransaction({
+        data: {
+          function: "0x4::aptos_token::set_collection_royalties_call",
+          typeArguments: ["0x4::aptos_token::AptosCollection"],
+          functionArguments: [collectionId, newRoyaltyNumerator, newRoyaltyDenominator, newPayee],
+        },
+      });
+      const executedTransaction = await aptosClient(expectedNetwork).waitForTransaction({
         transactionHash: committedTransaction.hash,
       });
       // TODO: Fix collection query for invalidation
@@ -199,11 +230,21 @@ export function ModifyCollection({ expectedNetwork }: { expectedNetwork: Network
         options={parseCollectionNames()}
         onChange={(e) => {
           setCollectionName(e?.value ?? "");
+          setCollectionId(e?.collection_id ?? "");
           onCollectionChange(e?.collection_id ?? "");
         }}
       ></Select>
       {parseOneCollection()}
       <LabelValueGrid items={parseTokenData()} />
+      <h4 className="text-lg font-medium">Set Collection Royalties</h4>
+      Royalty Numerator{" "}
+      <Input disabled={!account} defaultValue={""} onChange={(e) => setNewRoyaltyNumerator(e.target.value)} />
+      Royalty Denominator{" "}
+      <Input disabled={!account} defaultValue={""} onChange={(e) => setNewRoyaltyDenominator(e.target.value)} />
+      Royalty Payee <Input disabled={!account} defaultValue={""} onChange={(e) => setNewPayee(e.target.value)} />
+      <Button disabled={!account} onClick={onRoyaltyChange}>
+        Set Collection Royalties
+      </Button>
       <h4 className="text-lg font-medium">Mint Token</h4>
       Name <Input disabled={!account} defaultValue={name} onChange={(e) => setName(e.target.value)} />
       Description{" "}

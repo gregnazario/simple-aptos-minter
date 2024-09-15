@@ -65,13 +65,13 @@ export type CollectionData = {
   last_transaction_version: any;
 };
 
-export async function fetchCollections(creatorAddress: string | null | undefined) {
+export async function fetchCollections(expectedNetwork: Network, creatorAddress: string | null | undefined) {
   if (!creatorAddress) {
     return [];
   }
 
   const address = AccountAddress.fromString(creatorAddress);
-  const client = aptosClient();
+  const client = aptosClient(expectedNetwork);
 
   const whereCondition: any = {
     creator_address: { _eq: address.toStringLong() },
@@ -92,12 +92,12 @@ export async function fetchCollections(creatorAddress: string | null | undefined
   return data.current_collections_v2;
 }
 
-export async function fetchTokens(collectionId: string | null | undefined) {
+export async function fetchTokens(expectedNetwork: Network, collectionId: string | null | undefined) {
   if (!collectionId) {
     return [];
   }
 
-  const client = aptosClient();
+  const client = aptosClient(expectedNetwork);
 
   const whereCondition: any = {
     collection_id: { _eq: collectionId },
@@ -117,12 +117,12 @@ export async function fetchTokens(collectionId: string | null | undefined) {
 }
 
 export function Collections({ expectedNetwork }: { expectedNetwork: Network }) {
-  const { account } = useWallet();
+  const { account, network } = useWallet();
   const [collections, setCollections] = useState<Array<CollectionData>>([]);
 
   useEffect(() => {
-    fetchCollections(account?.address).then(setCollections);
-  }, [account?.address]);
+    fetchCollections(expectedNetwork, account?.address).then(setCollections);
+  }, [account?.address, network, expectedNetwork]);
 
   function parseCollectionData() {
     const parsedCollections = [];
